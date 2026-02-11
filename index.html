@@ -1,86 +1,45 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#4CAF50">
-    <title>Rio Fac - Lector de Facturas</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🧾 Rio Fac</h1>
-            <p>Escanea tus facturas al instante</p>
-        </header>
+<script>
+    // 1. Aquí definimos la dirección de tu "Cerebro" en Render
+    const API_URL = 'https://rio-fac.onrender.com';
 
-        <main>
-            <div class="upload-section">
-                <input type="file" id="fileInput" accept="image/*" capture="environment">
-                <label for="fileInput" class="upload-btn">
-                    📸 Subir Factura
-                </label>
-            </div>
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
 
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>Procesando...</p>
-            </div>
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('result').classList.add('hidden');
 
-            <div id="result" class="result hidden">
-                <h2>Datos Extraídos</h2>
-                <div class="data-card">
-                    <p><strong>Comercio:</strong> <span id="comercio"></span></p>
-                    <p><strong>Fecha:</strong> <span id="fecha"></span></p>
-                    <p><strong>Total:</strong> <span id="total"></span></p>
-                </div>
-                <button onclick="verHistorial()" class="btn-secondary">Ver Historial</button>
-            </div>
-        </main>
-    </div>
+        const formData = new FormData();
+        formData.append('file', file);
 
-    <script>
-        const API_URL = 'https://rio-fac.onrender.com';
+        try {
+            // 2. Aquí corregimos el "cable": enviamos la foto a Render
+            const response = await fetch(`${API_URL}/upload`, {
+                method: 'POST',
+                body: formData
+            });
 
-        document.getElementById('fileInput').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+            const data = await response.json();
 
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('result').classList.add('hidden');
+            // 3. Mostramos los resultados que nos devuelve el robot
+            document.getElementById('comercio').textContent = data.datos_extraidos.comercio || 'No detectado';
+            document.getElementById('fecha').textContent = data.datos_extraidos.fecha || 'No detectada';
+            document.getElementById('total').textContent = '$' + (data.datos_extraidos.total || '0');
 
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const response = await fetch(`${API_URL}/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                document.getElementById('comercio').textContent = data.datos_extraidos.comercio;
-                document.getElementById('fecha').textContent = data.datos_extraidos.fecha;
-                document.getElementById('total').textContent = '$' + data.datos_extraidos.total;
-
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('result').classList.remove('hidden');
-            } catch (error) {
-                alert('Error al procesar la factura');
-                document.getElementById('loading').classList.add('hidden');
-            }
-        });
-
-        function verHistorial() {
-            window.location.href = `${API_URL}/facturas`;
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('result').classList.remove('hidden');
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con el robot de Render');
+            document.getElementById('loading').classList.add('hidden');
         }
+    });
 
-        // Registro del Service Worker para PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
-        }
-    </script>
-</body>
-</html>
+    function verHistorial() {
+        window.location.href = `${API_URL}/facturas`;
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
+</script>
