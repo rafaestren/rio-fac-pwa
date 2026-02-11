@@ -1,45 +1,57 @@
-<script>
-    // 1. Aquí definimos la dirección de tu "Cerebro" en Render
-    const API_URL = 'https://rio-fac.onrender.com';
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector de Facturas OCR</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Extrae datos de facturas con OCR">
+    <meta name="theme-color" content="#667eea">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 OCR Facturas</h1>
+            <p>Sube una foto de tu factura</p>
+        </header>
 
-    document.getElementById('fileInput').addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        <main>
+            <!-- Sección de carga -->
+            <div class="upload-section" id="uploadSection">
+                <label for="fileInput" class="upload-btn">
+                    📷 Seleccionar Imagen
+                </label>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
 
-        document.getElementById('loading').classList.remove('hidden');
-        document.getElementById('result').classList.add('hidden');
+            <!-- Indicador de carga -->
+            <div class="loading hidden" id="loading">
+                <div class="spinner"></div>
+                <p>Procesando factura...</p>
+            </div>
 
-        const formData = new FormData();
-        formData.append('file', file);
+            <!-- Resultados -->
+            <div class="result hidden" id="result">
+                <h2>✅ Datos Extraídos</h2>
+                <div class="data-card">
+                    <p><strong>Comercio:</strong> <span id="comercio">-</span></p>
+                    <p><strong>Fecha:</strong> <span id="fecha">-</span></p>
+                    <p><strong>Total:</strong> <span id="total">-</span></p>
+                    <p><strong>Motor usado:</strong> <span id="motor">-</span></p>
+                </div>
+                <button class="btn-secondary" onclick="resetApp()">
+                    🔄 Subir otra factura
+                </button>
+            </div>
+        </main>
+    </div>
 
-        try {
-            // 2. Aquí corregimos el "cable": enviamos la foto a Render
-            const response = await fetch(`${API_URL}/upload`, {
-                method: 'POST',
-                body: formData
-            });
-
-            const data = await response.json();
-
-            // 3. Mostramos los resultados que nos devuelve el robot
-            document.getElementById('comercio').textContent = data.datos_extraidos.comercio || 'No detectado';
-            document.getElementById('fecha').textContent = data.datos_extraidos.fecha || 'No detectada';
-            document.getElementById('total').textContent = '$' + (data.datos_extraidos.total || '0');
-
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('result').classList.remove('hidden');
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Error al conectar con el robot de Render');
-            document.getElementById('loading').classList.add('hidden');
-        }
-    });
-
-    function verHistorial() {
-        window.location.href = `${API_URL}/facturas`;
-    }
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js');
-    }
-</script>
+    <!-- Script -->
+    <script src="script.js"></script>
+</body>
+</html>
