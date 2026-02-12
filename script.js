@@ -71,11 +71,49 @@ function mostrarResultados(data) {
     // Mostrar resultados
     result.classList.remove('hidden');
     
-    // Llenar datos
+    // Llenar datos principales
     document.getElementById('comercio').textContent = data.datos_extraidos.comercio;
     document.getElementById('fecha').textContent = data.datos_extraidos.fecha;
-    document.getElementById('total').textContent = `$${data.datos_extraidos.total}`;
+    
+    // Formatear el total con separadores de miles
+    const totalFormateado = new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+    }).format(data.datos_extraidos.total);
+    document.getElementById('total').textContent = totalFormateado;
+    
     document.getElementById('motor').textContent = data.motor_usado;
+    
+    // Mostrar número de productos
+    const numProductos = data.datos_extraidos.num_productos || 0;
+    document.getElementById('numProductos').textContent = numProductos;
+    
+    // Mostrar lista de productos si hay
+    const productosContainer = document.getElementById('productosContainer');
+    const listaProductos = document.getElementById('listaProductos');
+    
+    if (numProductos > 0 && data.datos_extraidos.productos) {
+        productosContainer.classList.remove('hidden');
+        listaProductos.innerHTML = '';
+        
+        data.datos_extraidos.productos.forEach((producto, index) => {
+            const productoDiv = document.createElement('div');
+            productoDiv.className = 'producto-item';
+            productoDiv.innerHTML = `
+                <span class="producto-nombre">${producto.nombre}</span>
+                <span class="producto-cantidad">x${producto.cantidad}</span>
+                <span class="producto-precio">${new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
+                    minimumFractionDigits: 0
+                }).format(producto.precio)}</span>
+            `;
+            listaProductos.appendChild(productoDiv);
+        });
+    } else {
+        productosContainer.classList.add('hidden');
+    }
 }
 
 // Función para resetear la app

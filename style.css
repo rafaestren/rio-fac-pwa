@@ -130,3 +130,66 @@ main {
 .hidden {
     display: none;
 }
+
+/* Estilos para productos */
+#productosContainer {
+    margin-top: 20px;
+}
+
+#productosContainer h3 {
+    color: #333;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #667eea;
+}
+
+.productos-lista {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.producto-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: white;
+    border-radius: 8px;
+    border-left: 3px solid #4CAF50;
+    transition: all 0.2s;
+}
+
+.producto-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.producto-nombre {
+    flex: 1;
+    font-weight: 500;
+    color: #333;
+}
+
+.producto-cantidad {
+    color: #667eea;
+    font-weight: 600;
+    margin: 0 15px;
+    background: #f0f0f0;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.9em;
+}
+
+.producto-precio {
+    color: #4CAF50;
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+.total-amount {
+    color: #4CAF50;
+    font-size: 1.3em;
+    font-weight: 700;
+}

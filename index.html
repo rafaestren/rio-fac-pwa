@@ -3,55 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lector de Facturas OCR</title>
-    
-    <!-- PWA Meta Tags -->
-    <meta name="description" content="Extrae datos de facturas con OCR">
     <meta name="theme-color" content="#667eea">
+    <title>OCR Facturas - Rio Fac</title>
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+        }
+
+        main {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .upload-section {
+            text-align: center;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-btn {
+            display: inline-block;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            margin-top: 30px;
+        }
+
+        .result h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .data-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .data-item {
+            margin: 12px 0;
+            font-size: 1.05em;
+        }
+
+        .data-item strong {
+            color: #667eea;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e3f2fd;
+            color: #1976d2;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .productos-section {
+            margin-top: 20px;
+        }
+
+        .productos-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .producto-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4CAF50;
+            transition: all 0.2s;
+        }
+
+        .producto-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .producto-nombre {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .producto-detalles {
+            font-size: 0.9em;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn-secondary:hover {
+            background: #764ba2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .motor-info {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📄 OCR Facturas</h1>
+            <h1>🧾 OCR Facturas</h1>
             <p>Sube una foto de tu factura</p>
         </header>
 
         <main>
-            <!-- Sección de carga -->
-            <div class="upload-section" id="uploadSection">
+            <div class="upload-section">
+                <input type="file" id="fileInput" accept="image/*" capture="environment">
                 <label for="fileInput" class="upload-btn">
-                    📷 Seleccionar Imagen
+                    📸 Subir Factura
                 </label>
-                <input type="file" id="fileInput" accept="image/*">
             </div>
 
-            <!-- Indicador de carga -->
-            <div class="loading hidden" id="loading">
+            <div id="loading" class="loading hidden">
                 <div class="spinner"></div>
                 <p>Procesando factura...</p>
             </div>
 
-            <!-- Resultados -->
-            <div class="result hidden" id="result">
-                <h2>✅ Datos Extraídos</h2>
+            <div id="result" class="result hidden">
+                <h2>
+                    <span style="font-size: 1.5em;">✅</span> 
+                    Datos Extraídos
+                </h2>
+                
                 <div class="data-card">
-                    <p><strong>Comercio:</strong> <span id="comercio">-</span></p>
-                    <p><strong>Fecha:</strong> <span id="fecha">-</span></p>
-                    <p><strong>Total:</strong> <span id="total">-</span></p>
-                    <p><strong>Motor usado:</strong> <span id="motor">-</span></p>
+                    <div class="data-item">
+                        <strong>Comercio:</strong> 
+                        <span id="comercio"></span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Fecha:</strong> 
+                        <span id="fecha"></span>
+                    </div>
+                    <div class="data-item">
+                        <strong>Total:</strong> 
+                        <span id="total" style="font-size: 1.3em; color: #4CAF50; font-weight: bold;"></span>
+                    </div>
+                    <div class="motor-info">
+                        Motor usado: <span id="motor"></span>
+                    </div>
                 </div>
-                <button class="btn-secondary" onclick="resetApp()">
+
+                <div id="productosSection" class="productos-section hidden">
+                    <h3>🛒 Productos (<span id="productosCount">0</span>)</h3>
+                    <div id="productosLista"></div>
+                </div>
+
+                <button onclick="location.reload()" class="btn-secondary">
                     🔄 Subir otra factura
                 </button>
             </div>
         </main>
     </div>
 
-    <!-- Script -->
-    <script src="script.js"></script>
+    <script>
+        const API_URL = 'https://rio-fac.onrender.com';
+
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Mostrar loading
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+            document.querySelector('.upload-section').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log('✅ Respuesta completa:', data);
+
+                // Mostrar datos básicos (CORREGIDO)
+                document.getElementById('comercio').textContent = data.datos_extraidos.comercio || 'No encontrado';
+                document.getElementById('fecha').textContent = data.datos_extraidos.fecha || 'No encontrada';
+                
+                // Formatear el total como moneda colombiana
+                const totalFormateado = new Intl.NumberFormat('es-CO', {
+                    style: 'currency',
+                    currency: 'COP',
+                    minimumFractionDigits: 0
+                }).format(data.datos_extraidos.total || 0);
+                document.getElementById('total').textContent = totalFormateado;
+                
+                document.getElementById('motor').textContent = data.motor_usado || 'Tesseract (Local)';
+
+                // Mostrar productos si existen (CORREGIDO)
+                const productos = data.datos_extraidos.productos || [];
+                if (productos.length > 0) {
+                    document.getElementById('productosSection').classList.remove('hidden');
+                    document.getElementById('productosCount').textContent = productos.length;
+                    
+                    const listaHTML = productos.map(p => `
+                        <div class="producto-item">
+                            <div class="producto-nombre">${p.nombre}</div>
+                            <div class="producto-detalles">
+                                <span>📦 Cantidad: ${p.cantidad}</span>
+                                <span style="color: #4CAF50; font-weight: 600;">${new Intl.NumberFormat('es-CO', {
+                                    style: 'currency',
+                                    currency: 'COP',
+                                    minimumFractionDigits: 0
+                                }).format(p.precio)}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('productosLista').innerHTML = listaHTML;
+                } else {
+                    document.getElementById('productosSection').classList.add('hidden');
+                }
+
+                // Ocultar loading y mostrar resultado
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('result').classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error al procesar la imagen: ' + error.message);
+                document.getElementById('loading').classList.add('hidden');
+                document.querySelector('.upload-section').style.display = 'block';
+            }
+        });
+
+        // Registro del Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {
+                console.log('ℹ️ Service Worker no disponible (normal en desarrollo)');
+            });
+        }
+
+        // Log de inicio
+        console.log('🚀 Rio-Fac OCR cargado');
+        console.log('📡 Backend:', API_URL);
+    </script>
 </body>
 </html>
