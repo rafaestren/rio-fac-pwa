@@ -262,11 +262,26 @@
         document.getElementById('fileInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-const data = await response.json();
+
+            // Mostrar loading
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+            document.querySelector('.upload-section').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
                 console.log('✅ Respuesta completa:', data);
 
-                // Mostrar datos básicos
-                document.getElementById('comercio').textContent = data.datos_extraidos.establecimiento || 'No encontrado';
+                // Mostrar datos básicos (CORREGIDO)
+                document.getElementById('comercio').textContent = data.datos_extraidos.comercio || 'No encontrado';
                 document.getElementById('fecha').textContent = data.datos_extraidos.fecha || 'No encontrada';
                 
                 // Formatear el total como moneda colombiana
@@ -276,28 +291,6 @@ const data = await response.json();
                     minimumFractionDigits: 0
                 }).format(data.datos_extraidos.total || 0);
                 document.getElementById('total').textContent = totalFormateado;
-                
-                document.getElementById('motor').textContent = data.motor_usado || 'Tesseract (Local)';
-
-                // Mostrar productos si existen
-                const productos = data.datos_extraidos.productos || [];
-                if (productos.length > 0) {
-                    document.getElementById('productosSection').classList.remove('hidden');
-                    document.getElementById('productosCount').textContent = productos.length;
-                    
-                    const listaHTML = productos.map(p => `
-                        <div class="producto-item">
-                            <div class="producto-nombre">${p.nombre}</div>
-                            <div class="producto-detalles">
-                                <span>📦 Cantidad: ${p.cantidad}</span>
-                                <span style="color: #4CAF50; font-weight: 600;">${new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0
-}).format(p.precio)}</span>
-                            </div>
-                        </div>
-                    `).join('');
                 
                 document.getElementById('motor').textContent = data.motor_usado || 'Tesseract (Local)';
 
@@ -311,12 +304,12 @@ const data = await response.json();
                         <div class="producto-item">
                             <div class="producto-nombre">${p.nombre}</div>
                             <div class="producto-detalles">
-                                <span>📦 Cantidad: ${p.cantidad}</span>
+                                <span>📦 Cantidad: ${p.cantidad} ${p.unidad || ''}</span>
                                 <span style="color: #4CAF50; font-weight: 600;">${new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0
-}).format(p.valor)}</span>
+                                    style: 'currency',
+                                    currency: 'COP',
+                                    minimumFractionDigits: 0
+                                }).format(p.precio)}</span>
                             </div>
                         </div>
                     `).join('');
