@@ -280,8 +280,8 @@
                 const data = await response.json();
                 console.log('✅ Respuesta completa:', data);
 
-                // Mostrar datos básicos (CORREGIDO)
-                document.getElementById('comercio').textContent = data.datos_extraidos.comercio || 'No encontrado';
+                // Mostrar datos básicos
+                document.getElementById('comercio').textContent = data.datos_extraidos.establecimiento || 'No encontrado';
                 document.getElementById('fecha').textContent = data.datos_extraidos.fecha || 'No encontrada';
                 
                 // Formatear el total como moneda colombiana
@@ -294,7 +294,7 @@
                 
                 document.getElementById('motor').textContent = data.motor_usado || 'Tesseract (Local)';
 
-                // Mostrar productos si existen (CORREGIDO)
+                // Mostrar productos si existen
                 const productos = data.datos_extraidos.productos || [];
                 if (productos.length > 0) {
                     document.getElementById('productosSection').classList.remove('hidden');
@@ -304,12 +304,12 @@
                         <div class="producto-item">
                             <div class="producto-nombre">${p.nombre}</div>
                             <div class="producto-detalles">
-                                <span>📦 Cantidad: ${p.cantidad} ${p.unidad || ''}</span>
+                                <span>📦 Cantidad: ${p.cantidad}</span>
                                 <span style="color: #4CAF50; font-weight: 600;">${new Intl.NumberFormat('es-CO', {
-                                    style: 'currency',
-                                    currency: 'COP',
-                                    minimumFractionDigits: 0
-                                }).format(p.precio)}</span>
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+}).format(p.precio)}</span>
                             </div>
                         </div>
                     `).join('');
